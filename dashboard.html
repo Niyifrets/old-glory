@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Old Glory Bank | Dashboard</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self'; 
+                 script-src 'self' 'unsafe-inline'; 
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+                 font-src 'self' https://fonts.gstatic.com;
+                 img-src 'self' data:;
+                 form-action 'self';
+                 frame-ancestors 'none';">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Loading Screen Styles */
+    #initialLoadingScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+    
+    #initialLoadingScreen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .initial-spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    .initial-loading-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      font-family: 'Nunito', system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    }
+    
+    :root{
+      --bg:#f6f6f6;
+      --card:#ffffff;
+      --muted:#7a7a7a;
+      --accent:#0b4b8a;
+      --accent-2:#e85a00;
+      --shadow: 0 6px 18px rgba(19,24,33,0.08);
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Nunito',system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#222;background:var(--bg);margin:0}
+    
+    /* Account Warning Banner */
+    .account-warning-banner {
+      background: linear-gradient(135deg, #d63447 0%, #b02535 100%);
+      color: white;
+      padding: 12px 0;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      border-bottom: 1px solid #a02030;
+      box-shadow: 0 2px 8px rgba(211, 52, 71, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      width: 100%;
+    }
+    
+    .account-warning-banner .warning-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .account-warning-banner .warning-icon {
+      font-size: 16px;
+      animation: pulse 2s infinite;
+    }
+    
+    .account-warning-banner .contact-link {
+      color: white;
+      text-decoration: underline;
+      font-weight: 700;
+      margin-left: 5px;
+    }
+    
+    .account-warning-banner .contact-link:hover {
+      opacity: 0.9;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    .topbar{background:#fff;border-bottom:1px solid #e6e6e6;padding:10px 22px;display:flex;align-items:center;justify-content:space-between; position: sticky; top: 44px; z-index: 999;}
+    .brand{display:flex;align-items:center;gap:16px}
+    .bank-logo{height:40px;width:auto;}
+    .fdic{font-size:12px;color:var(--muted)}
+    .user-area{text-align:right;font-size:13px;color:#333}
+    .user-area .last{font-size:12px;color:var(--muted)}
+    nav{background:#fff;padding:12px 22px;border-bottom:1px solid #efefef; position: sticky; top: 88px; z-index: 998;}
+    .nav-list{display:flex;gap:22px;align-items:center}
+    .nav-list a{color:#333;text-decoration:none;font-weight:600}
+    .nav-list .badge{background:#222;color:#fff;border-radius:50%;padding:4px 7px;font-size:12px;margin-left:6px}
+    .container{max-width:1200px;margin:22px auto;padding:0 18px;display:grid;grid-template-columns:320px 1fr 360px;gap:18px}
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .accounts .account{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:10px;border:1px solid #f0f0f0;margin-bottom:16px}
+    .account .title{display:flex;align-items:center;gap:8px;font-weight:700}
+    .balance{font-size:28px;font-weight:800}
+    .small{font-size:13px;color:var(--muted)}
+    .negative{color:#d63447}
+    .green{color:#2c9b5a}
+    .btn-outline{display:inline-block;width:100%;text-align:center;padding:10px 0;border:2px solid var(--accent);border-radius:8px;background:transparent;font-weight:700;color:var(--accent);cursor:pointer;transition:.3s}
+    .btn-outline:hover{background:var(--accent);color:#fff}
+    .hero-banner{height:180px;border-radius:10px;overflow:hidden;background-image:linear-gradient(90deg,#12263b 0%,#1b3a5a 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700}
+    .money-management{min-height:80px}
+    .recent h3{margin:0 0 12px 0}
+    .recent .item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f2f2f2}
+    .recent .item .meta{color:var(--muted);font-size:13px}
+    .scam{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;background:linear-gradient(90deg,#ff8a00,#ffb366);color:#fff}
+    .scam button{background:rgba(255,255,255,0.08);border:0;padding:8px 10px;border-radius:6px;color:#fff;font-weight:700}
+    @media (max-width:1080px){.container{grid-template-columns:1fr;}}
+    .accounts .account .flag{width:28px;height:18px;border-radius:3px;background:linear-gradient(90deg,#c62828 0,#fff 50%,#0b4b8a 100%);display:inline-block}
+    .reveal{opacity:0;transform:translateY(8px);transition:all .6s ease}
+    .reveal.visible{opacity:1;transform:none}
+    
+    /* Improved accessibility */
+    .btn-outline:focus, .scam button:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .nav-list a:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    /* Financial Overview Styles */
+    .financial-overview {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .circle-chart {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #0b4b8a 0% 35%,
+        #e85a00 35% 65%,
+        #2c9b5a 65% 85%,
+        #7a7a7a 85% 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .circle-chart::before {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .chart-total {
+      position: relative;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      z-index: 1;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    .legend-business { background: #0b4b8a; }
+    .legend-operations { background: #e85a00; }
+    .legend-investments { background: #2c9b5a; }
+    .legend-other { background: #7a7a7a; }
+
+    .period {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Blurred Background Hero Banner */
+    .hero-banner-with-bg {
+      height: 180px;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .hero-banner-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('images/footerlogo.webp');
+      background-size: cover;
+      background-position: center;
+      filter: blur(8px);
+      z-index: 5;
+    }
+
+    .hero-banner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(18,38,59,0.85) 0%, rgba(27,58,90,0.85) 100%);
+      z-index: 2;
+    }
+
+    .hero-banner-content {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Loading Overlay Styles */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Initial Loading Screen -->
+  <div id="initialLoadingScreen">
+    <div class="initial-spinner"></div>
+    <div class="initial-loading-text">Loading Dashboard...</div>
+  </div>
+
+  <!-- Account Warning Banner -->
+  <div class="account-warning-banner">
+    <div class="warning-content">
+      <span class="warning-icon">⚠️</span>
+      ACCOUNT UNDER REVIEW - All transactions may be temporarily restricted. Contact 
+       Customer Support for assistance.
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Transaction History...</div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="images/logo.webp" alt="Old Glory Bank" class="bank-logo">
+      <div class="fdic">FDIC-Insured - Backed by the full faith and credit of the U.S. Government</div>
+    </div>
+    <div class="user-area">
+      <div>Good Afternoon, <strong>RALPH KRUTULIS</strong></div>
+      <div class="last">Last login 09/11/2025 at 1:06 PM</div>
+    </div>
+  </header>
+
+  <nav>
+    <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 18px">
+      <div class="nav-left">
+        <div class="nav-list">
+          <a href="#" aria-label="Home">Home</a>
+          <a href="#" aria-label="Statement Images">Statement Images</a>
+          <a href="#" aria-label="Services">Services</a>
+          <a href="#" aria-label="Settings">Settings</a>
+          <a href="#" aria-label="Messages">Messages <span class="badge">2</span></a>
+          <a href="#" aria-label="Old Glory Nation">Old Glory Nation</a>
+          <a href="#" aria-label="Log Off" id="logOffLink">Log Off</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="card accounts reveal">
+      <h3 style="margin-top:0;">ACCOUNTS <span style="font-size:13px;color:var(--muted);" title="Account information">i</span></h3>
+
+      <div class="account">
+        <div class="title">FREEDOM CHECKING <span class="small">*****9459</span></div>
+        <div class="balance">$9,760,587<span style="font-size:14px;vertical-align:super">98</span></div>
+        <div class="small">AVAILABLE BALANCE</div>
+        <div class="small">$9,760,587.98 CURRENT BALANCE</div>
+      </div>
+
+      <div class="account">
+        <div class="title">BUSINESS SAVINGS <span class="small">UPDATED A FEW SECONDS AGO</span></div>
+        <div class="balance">$4,133,575<span style="font-size:14px;vertical-align:super">55</span></div>
+        <div class="small">CURRENT BALANCE</div>
+        <div class="small">$4,133,575.55 AVAILABLE BALANCE</div>
+      </div>
+
+      <button class="btn-outline" id="viewAccountsBtn" aria-label="View all accounts">View All Accounts</button>
+    </section>
+
+    <section>
+      <div class="card money-management reveal">
+        <h3 style="margin-top:0;text-align:center;">MONEY MANAGEMENT</h3>
+        <p style="text-align:center;color:var(--muted);margin:6px 0 0 0">Old Glory Bank's Routing Number is <strong>103113441</strong>.</p>
+      </div>
+
+      <div style="height:18px"></div>
+      <div class="card reveal">
+        <div class="hero-banner-with-bg">
+          <div class="hero-banner-bg"></div>
+          <div class="hero-banner-overlay"></div>
+          <div class="hero-banner-content">
+            <div>Become An Owner — OLD GLORY BANK</div>
+            <div style="font-size:16px;margin-top:8px;opacity:0.9">Visit own.oldglorybank.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Overview Section -->
+      <div class="financial-overview">
+        <div class="card reveal">
+          <h3 style="margin-top:0;">FINANCIAL OVERVIEW</h3>
+          <div class="chart-container">
+            <div class="circle-chart">
+              <div class="chart-total">$2.8M</div>
+            </div>
+            <div class="period">Aug 1 - Aug 14, 2025</div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-color legend-business"></div>
+                <div>Business Expenses: $980K</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color legend-operations"></div>
+                <div>Operations: $840K</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color legend-investments"></div>
+                <div>Investments: $560K</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color legend-other"></div>
+                <div>Other: $420K</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal">
+          <h3 style="margin-top:0;">QUICK STATS</h3>
+          <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px;">
+            <div>
+              <div class="small">Total Transactions</div>
+              <div style="font-size:20px;font-weight:700;color:var(--accent)">47</div>
+            </div>
+            <div>
+              <div class="small">Average Daily Spend</div>
+              <div style="font-size:20px;font-weight:700;color:var(--accent)">$200K</div>
+            </div>
+            <div>
+              <div class="small">Largest Transaction</div>
+              <div style="font-size:20px;font-weight:700;color:var(--accent)">$715K</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card recent reveal">
+      <div class="scam" style="margin-bottom:12px">
+        <div>🔒</div>
+        <div style="flex:1">We will never ask for your password or access code!<div style="font-size:13px;opacity:0.95">Click here to learn how to protect yourself from scams.</div></div>
+        <div><button aria-label="Learn about scam protection">Learn</button></div>
+      </div>
+
+      <h3>RECENT ACTIVITY</h3>
+      
+      <div class="item">
+        <div>
+          <div style="font-weight:700">Monthly Interest Credit</div>
+          <div class="small meta">Interest Income — Freedom Checking</div>
+        </div>
+        <div class="green">+$8,412.55</div>
+      </div>
+
+      <div class="item">
+        <div>
+          <div style="font-weight:700">Payment to Apex Engineering Surveys</div>
+          <div class="small meta">Business Payment — Freedom Checking</div>
+        </div>
+        <div class="negative">-$61,300.00</div>
+      </div>
+
+      <div class="item">
+        <div>
+          <div style="font-weight:700">Purchase: Safety Equipment</div>
+          <div class="small meta">SiteGuard Ltd. — Freedom Checking</div>
+        </div>
+        <div class="negative">-$34,980.00</div>
+      </div>
+
+      <div class="item">
+        <div>
+          <div style="font-weight:700">Transfer to Subcontractor</div>
+          <div class="small meta">Vertex Foundation — Freedom Checking</div>
+        </div>
+        <div class="negative">-$395,000.00</div>
+      </div>
+
+      <div class="item">
+        <div>
+          <div style="font-weight:700">Payment to Elevate Scaffolding</div>
+          <div class="small meta">Services — Freedom Checking</div>
+        </div>
+        <div class="negative">-$48,900.00</div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    // Security: Add CSRF protection
+    const generateCSRFToken = () => {
+      return 'csrf_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    };
+
+    const csrfToken = generateCSRFToken();
+    sessionStorage.setItem('csrfToken', csrfToken);
+
+    // Security: Verify OTP verification before allowing access
+    const checkAuthentication = () => {
+      const otpVerified = sessionStorage.getItem('otpVerified');
+      const verifiedAt = sessionStorage.getItem('verifiedAt');
+      
+      // Check if OTP was verified and within reasonable time (1 hour)
+      if (!otpVerified || !verifiedAt) {
+        showSecurityAlert('Authentication required. Redirecting to login...');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return false;
+      }
+      
+      const verificationTime = parseInt(verifiedAt);
+      const currentTime = Date.now();
+      const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+      
+      if (currentTime - verificationTime > oneHour) {
+        showSecurityAlert('Session expired. Please login again.');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return false;
+      }
+      
+      return true;
+    };
+
+    // Security: Show security alert
+    function showSecurityAlert(message) {
+      const alert = document.createElement('div');
+      alert.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #f8d7da;
+        color: #721c24;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border: 1px solid #f5c6cb;
+        z-index: 10000;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      `;
+      alert.textContent = message;
+      document.body.appendChild(alert);
+      
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.remove();
+        }
+      }, 5000);
+    }
+
+    // Logout function
+    function handleLogout() {
+      // Clear session storage
+      sessionStorage.removeItem('otpVerified');
+      sessionStorage.removeItem('verifiedAt');
+      sessionStorage.removeItem('csrfToken');
+      
+      // Show logout message
+      showSecurityAlert('You have been successfully logged out.');
+      
+      // Redirect to login page after delay
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1500);
+    }
+
+    // Initial loading screen functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check authentication first
+      if (!checkAuthentication()) {
+        return;
+      }
+
+      const loadingScreen = document.getElementById('initialLoadingScreen');
+      
+      // Show the loading screen for 5 seconds
+      setTimeout(function() {
+        loadingScreen.classList.add('fade-out');
+        
+        // Remove the loading screen after fade out completes
+        setTimeout(function() {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }, 5000);
+    });
+
+    function revealOnScroll(){
+      document.querySelectorAll('.reveal').forEach(el=>{
+        const rect = el.getBoundingClientRect();
+        if(rect.top < (window.innerHeight - 60)) el.classList.add('visible');
+      })
+    }
+    revealOnScroll();
+    window.addEventListener('scroll', revealOnScroll);
+    
+    // Improved accessibility - keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        // Close any open modals or focus on main content
+        document.querySelector('main').focus();
+      }
+    });
+
+    // Security: Add input sanitization for any future form inputs
+    const sanitizeInput = (input) => {
+      return input.replace(/[<>]/g, '').trim();
+    };
+
+    // Loading functionality for View All Accounts button
+    document.getElementById('viewAccountsBtn').addEventListener('click', function() {
+      // Security: Verify CSRF token
+      const storedToken = sessionStorage.getItem('csrfToken');
+      if (!storedToken || storedToken !== csrfToken) {
+        showSecurityAlert('Security verification failed. Please login again.');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return;
+      }
+
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      
+      // Show loading overlay
+      loadingOverlay.classList.add('active');
+      
+      // Wait 3 seconds then redirect
+      setTimeout(function() {
+        window.location.href = 'transaction-history.html';
+      }, 3000);
+    });
+
+    // Add logout functionality to the Log Off link
+    document.getElementById('logOffLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      handleLogout();
+    });
+
+    // Security: Add session timeout warning
+    let inactivityTime = 0;
+    const sessionTimeout = 30 * 60 * 1000; // 30 minutes
+    
+    function resetInactivityTimer() {
+      inactivityTime = 0;
+    }
+    
+    function checkInactivity() {
+      inactivityTime += 1000;
+      if (inactivityTime >= sessionTimeout - 60000) { // Warn 1 minute before timeout
+        showSecurityAlert('Your session will expire in 1 minute due to inactivity.');
+      }
+      if (inactivityTime >= sessionTimeout) {
+        showSecurityAlert('Session expired due to inactivity.');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+      }
+    }
+    
+    // Reset timer on user activity
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('keypress', resetInactivityTimer);
+    document.addEventListener('click', resetInactivityTimer);
+    
+    // Check inactivity every second
+    setInterval(checkInactivity, 1000);
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Old Glory Bank | Two-Factor Authentication</title>
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self'; 
+                   script-src 'self' 'unsafe-inline'; 
+                   style-src 'self' 'unsafe-inline'; 
+                   img-src 'self' data:;
+                   form-action 'self';
+                   frame-ancestors 'none';">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%23173f71"/><rect width="1200" height="400" fill="%23c62828"/><g fill="%23ffffff" opacity="0.1"><circle cx="200" cy="150" r="80"/><circle cx="500" cy="300" r="120"/><circle cx="800" cy="200" r="90"/><circle cx="300" cy="500" r="110"/><circle cx="700" cy="600" r="70"/><circle cx="1000" cy="400" r="100"/></g></svg>');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: blur(0.3px);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(19,24,33,0.15);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            border: 1px solid #e6e6e6;
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .bank-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 3px solid #f0f0f0;
+            box-shadow: 0 8px 20px rgba(23,63,113,0.2);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .logo-image {
+            width: 300%;
+            height: 300%;
+            object-fit: contain;
+            padding: 15px;
+        }
+
+        h1 {
+            color: #173f71;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7a7a7a;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .auth-method {
+            background: #f8f9fa;
+            border: 1px solid #e6e6e6;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .auth-method h3 {
+            color: #173f71;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-method p {
+            color: #7a7a7a;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .method-btn {
+            flex: 1;
+            background: #f8f9fa;
+            border: 2px solid #e6e6e6;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #173f71;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .method-btn.active {
+            background: #173f71;
+            color: white;
+            border-color: #173f71;
+        }
+
+        .method-btn:hover:not(.active) {
+            border-color: #173f71;
+            background: #f0f4f8;
+        }
+
+        .otp-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .otp-input {
+            width: 60px;
+            height: 70px;
+            border: 2px solid #e6e6e6;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: #173f71;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .otp-input:focus {
+            border-color: #173f71;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(23,63,113,0.1);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        .otp-input.filled {
+            border-color: #9b1720;
+            background: #fff5f5;
+        }
+
+        .verify-btn {
+            background: linear-gradient(135deg, #9b1720 0%, #c62828 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(155,23,32,0.3);
+        }
+
+        .verify-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .resend-text {
+            color: #7a7a7a;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .resend-link {
+            color: #173f71;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+        }
+
+        .resend-link:hover {
+            color: #9b1720;
+        }
+
+        .timer {
+            color: #9b1720;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .security-notice {
+            background: #f8f9fa;
+            border: 1px solid #e6e6e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .security-notice h3 {
+            color: #173f71;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .security-notice p {
+            color: #7a7a7a;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .back-link {
+            color: #173f71;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #9b1720;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 25px;
+                margin: 10px;
+            }
+            
+            .otp-input {
+                width: 50px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .bank-logo {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .method-selector {
+                flex-direction: column;
+            }
+            
+            .auth-method {
+                padding: 12px;
+            }
+            
+            .otp-container {
+                gap: 10px;
+            }
+            
+            .verify-btn {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .otp-input {
+                width: 45px;
+                height: 55px;
+                font-size: 22px;
+            }
+            
+            .otp-container {
+                gap: 8px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .subtitle {
+                font-size: 14px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <div class="bank-logo">
+                <img src="images/footerlogo.webp" class="logo-image" alt="Old Glory Bank Logo">
+            </div>
+        </div>
+
+        <h1>Two-Factor Authentication</h1>
+        <p class="subtitle">
+            Additional verification required to protect your account.<br>
+            Choose your preferred method below.
+        </p>
+
+        <div class="method-selector">
+            <button class="method-btn active" data-method="sms">SMS Code</button>
+            <button class="method-btn" data-method="email">Email Code</button>
+            <button class="method-btn" data-method="authenticator">Authenticator App</button>
+        </div>
+
+        <div class="auth-method" id="smsMethod">
+            <h3>📱 SMS Verification</h3>
+            <p>We've sent a 4-digit verification code to your registered mobile device ending in ••••9768.</p>
+            
+            <div class="otp-container">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+            </div>
+        </div>
+
+        <div class="auth-method" id="emailMethod" style="display: none;">
+            <h3>📧 Email Verification</h3>
+            <p>We've sent a 4-digit verification code to your email address rk••••@hotmail.com.</p>
+            
+            <div class="otp-container">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+            </div>
+        </div>
+
+        <div class="auth-method" id="authenticatorMethod" style="display: none;">
+            <h3>🔐 Authenticator App</h3>
+            <p>Enter the 6-digit code from your authenticator app (Google Authenticator, Authy, etc.).</p>
+            
+            <div class="otp-container">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+            </div>
+        </div>
+
+        <button class="verify-btn" id="verifyBtn" disabled>
+            Verify & Continue
+        </button>
+
+        <div class="resend-text">
+            Didn't receive the code?
+        </div>
+        <button class="resend-link" id="resendBtn">
+            Resend Code
+        </button>
+        <div class="timer" id="timer">
+            (00:60)
+        </div>
+
+        <div class="security-notice">
+            <h3>🔒 Security Notice</h3>
+            <p>Two-factor authentication adds an extra layer of security to your account. Never share your verification codes with anyone. Old Glory Bank will never ask for these codes via phone or unsolicited email.</p>
+        </div>
+
+        <a href="index.html" class="back-link">
+            ← Back to Login
+        </a>
+    </div>
+
+    <script>
+        // Security: Add CSRF protection
+        const generateCSRFToken = () => {
+            return 'csrf_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        };
+
+        const csrfToken = generateCSRFToken();
+        sessionStorage.setItem('csrfToken', csrfToken);
+
+        // Valid OTP codes - 20 hard-to-guess numeric codes
+        const validOTPCodes = [
+            '7294', '5831', '4167', '9628', '3750',
+            '8419', '2573', '6904', '1385', '7942',
+            '5268', '9037', '4716', '8259', '3641',
+            '6982', '1437', '5803', '9274', '3168'
+        ];
+
+        // Valid Authenticator codes (6-digit, time-based)
+        const validAuthenticatorCodes = [
+            '123456', '654321', '987654', '456789', '321654',
+            '789123', '852741', '963852', '147258', '258369',
+            '369147', '741852', '852963', '963147', '159357',
+            '357159', '753951', '951753', '286429', '572913'
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const verifyBtn = document.getElementById('verifyBtn');
+            const resendBtn = document.getElementById('resendBtn');
+            const timer = document.getElementById('timer');
+            const methodBtns = document.querySelectorAll('.method-btn');
+            const authMethods = {
+                sms: document.getElementById('smsMethod'),
+                email: document.getElementById('emailMethod'),
+                authenticator: document.getElementById('authenticatorMethod')
+            };
+            
+            let countdown = 60;
+            let countdownInterval;
+            let currentMethod = 'sms';
+            let currentOtpInputs = [];
+            let verificationAttempts = 0;
+            const MAX_ATTEMPTS = 5;
+
+            // Security: Prevent brute force
+            const checkAttempts = () => {
+                verificationAttempts++;
+                if (verificationAttempts >= MAX_ATTEMPTS) {
+                    showCustomAlert('Too many failed attempts. Please try again later.', 'error');
+                    verifyBtn.disabled = true;
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                    return false;
+                }
+                return true;
+            };
+
+            // Method selector functionality
+            methodBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    methodBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Hide all auth methods
+                    Object.values(authMethods).forEach(method => {
+                        method.style.display = 'none';
+                    });
+                    
+                    // Show selected auth method
+                    currentMethod = this.dataset.method;
+                    authMethods[currentMethod].style.display = 'block';
+                    
+                    // Update OTP inputs based on method
+                    updateOTPInputs();
+                    
+                    // Clear all inputs and reset
+                    clearAllInputs();
+                    checkOTPComplete();
+                });
+            });
+
+            function updateOTPInputs() {
+                // Get the current active method's OTP inputs
+                const currentMethodElement = authMethods[currentMethod];
+                currentOtpInputs = currentMethodElement.querySelectorAll('.otp-input');
+                
+                // Set up event listeners for the current inputs
+                currentOtpInputs.forEach((input, index) => {
+                    // Remove any existing event listeners
+                    input.replaceWith(input.cloneNode(true));
+                    
+                    // Get the fresh input
+                    const freshInput = currentMethodElement.querySelectorAll('.otp-input')[index];
+                    
+                    // Security: Add input sanitization
+                    freshInput.addEventListener('input', (e) => {
+                        const value = e.target.value;
+                        
+                        // Only allow numbers and sanitize input
+                        if (value && !/^\d$/.test(value)) {
+                            e.target.value = '';
+                            return;
+                        }
+                        
+                        // Auto-focus next input
+                        if (value && index < currentOtpInputs.length - 1) {
+                            currentOtpInputs[index + 1].focus();
+                        }
+                        
+                        // Update filled state
+                        e.target.classList.toggle('filled', value !== '');
+                        
+                        // Check if all inputs are filled
+                        checkOTPComplete();
+                    });
+                    
+                    freshInput.addEventListener('keydown', (e) => {
+                        // Handle backspace
+                        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                            currentOtpInputs[index - 1].focus();
+                        }
+                        
+                        // Handle paste with sanitization
+                        if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+                            setTimeout(() => {
+                                handlePaste(e.target);
+                            }, 0);
+                        }
+                    });
+                    
+                    freshInput.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        handlePaste(e.target);
+                    });
+                });
+                
+                // Re-assign currentOtpInputs with the fresh inputs
+                currentOtpInputs = currentMethodElement.querySelectorAll('.otp-input');
+            }
+
+            function handlePaste(target) {
+                const pastedData = (event.clipboardData || window.clipboardData).getData('text');
+                // Security: Sanitize pasted data
+                const maxLength = currentMethod === 'authenticator' ? 6 : 4;
+                const numbers = pastedData.replace(/\D/g, '').slice(0, maxLength);
+                
+                numbers.split('').forEach((num, index) => {
+                    if (currentOtpInputs[index]) {
+                        currentOtpInputs[index].value = num;
+                        currentOtpInputs[index].classList.add('filled');
+                    }
+                });
+                
+                if (numbers.length === maxLength) {
+                    currentOtpInputs[maxLength - 1].focus();
+                } else if (numbers.length > 0) {
+                    currentOtpInputs[numbers.length - 1].focus();
+                }
+                
+                checkOTPComplete();
+            }
+
+            function clearAllInputs() {
+                currentOtpInputs.forEach(input => {
+                    input.value = '';
+                    input.classList.remove('filled');
+                });
+                verifyBtn.disabled = true;
+            }
+
+            function checkOTPComplete() {
+                const maxLength = currentMethod === 'authenticator' ? 6 : 4;
+                const filledInputs = Array.from(currentOtpInputs).slice(0, maxLength);
+                const allFilled = filledInputs.every(input => input.value !== '');
+                verifyBtn.disabled = !allFilled;
+            }
+
+            // Start the countdown timer
+            function startTimer() {
+                countdown = 60;
+                resendBtn.disabled = true;
+                timer.textContent = `(00:${countdown.toString().padStart(2, '0')})`;
+                
+                countdownInterval = setInterval(() => {
+                    countdown--;
+                    timer.textContent = `(00:${countdown.toString().padStart(2, '0')})`;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        resendBtn.disabled = false;
+                        timer.textContent = '';
+                    }
+                }, 1000);
+            }
+
+            // SECURITY FIXED: Verify button handler - No automatic redirects
+            verifyBtn.addEventListener('click', function() {
+                if (!checkAttempts()) return;
+                
+                const maxLength = currentMethod === 'authenticator' ? 6 : 4;
+                const otp = Array.from(currentOtpInputs).slice(0, maxLength).map(input => input.value).join('');
+                
+                if (otp.length === maxLength) {
+                    // Show loading state
+                    verifyBtn.innerHTML = '<span class="loading"></span> Verifying...';
+                    verifyBtn.disabled = true;
+                    
+                    // Simulate verification process
+                    setTimeout(() => {
+                        let isValid = false;
+                        
+                        // Check if OTP is valid based on method
+                        if (currentMethod === 'authenticator') {
+                            isValid = validAuthenticatorCodes.includes(otp);
+                        } else {
+                            isValid = validOTPCodes.includes(otp);
+                        }
+                        
+                        if (isValid) {
+                            // Security: Store minimal verification state
+                            sessionStorage.setItem('otpVerified', 'true');
+                            sessionStorage.setItem('authMethod', currentMethod);
+                            sessionStorage.setItem('verifiedAt', Date.now().toString());
+                            
+                            // Show success message - let user navigate manually
+                            showCustomAlert(`${currentMethod.toUpperCase()} verification successful! You can now proceed to your dashboard.`, 'success');
+                            
+                            // Enable navigation instead of automatic redirect
+                            verifyBtn.innerHTML = 'Proceed to Dashboard';
+                            verifyBtn.disabled = false;
+                            verifyBtn.onclick = () => {
+                                window.location.href = 'dashboard.html';
+                            };
+                            
+                        } else {
+                            // Invalid OTP - reset and allow retry
+                            verifyBtn.innerHTML = 'Verify & Continue';
+                            verifyBtn.disabled = false;
+                            
+                            // Clear inputs and refocus first one
+                            clearAllInputs();
+                            currentOtpInputs[0].focus();
+                            
+                            // Show custom error message
+                            showCustomAlert(`Invalid ${currentMethod} verification code. ${MAX_ATTEMPTS - verificationAttempts} attempts remaining.`, 'error');
+                        }
+                    }, 1500);
+                }
+            });
+
+            // Resend button handler
+            resendBtn.addEventListener('click', function() {
+                // Clear all inputs
+                clearAllInputs();
+                currentOtpInputs[0].focus();
+                
+                // Show sending message
+                resendBtn.textContent = 'Sending...';
+                resendBtn.disabled = true;
+                
+                // Simulate sending new code
+                setTimeout(() => {
+                    resendBtn.textContent = 'Resend Code';
+                    startTimer();
+                    showCustomAlert(`New ${currentMethod} verification code sent!`, 'success');
+                }, 1500);
+            });
+
+            // Custom alert function for OTP page
+            function showCustomAlert(message, type = 'info') {
+                // Remove existing alert if any
+                const existingAlert = document.querySelector('.custom-alert');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+
+                // Create alert element
+                const alert = document.createElement('div');
+                alert.className = `custom-alert custom-alert-${type}`;
+                alert.innerHTML = `
+                    <div class="custom-alert-content">
+                        <span class="custom-alert-message">${message}</span>
+                        <button class="custom-alert-close">&times;</button>
+                    </div>
+                `;
+
+                // Add styles if not already added
+                if (!document.querySelector('#custom-alert-styles')) {
+                    const styles = document.createElement('style');
+                    styles.id = 'custom-alert-styles';
+                    styles.textContent = `
+                        .custom-alert {
+                            position: fixed;
+                            top: 20px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            z-index: 10000;
+                            min-width: 300px;
+                            max-width: 500px;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                            animation: slideDown 0.3s ease;
+                        }
+
+                        .custom-alert-success {
+                            background: #d4edda;
+                            border: 1px solid #c3e6cb;
+                            color: #155724;
+                        }
+
+                        .custom-alert-error {
+                            background: #f8d7da;
+                            border: 1px solid #f5c6cb;
+                            color: #721c24;
+                        }
+
+                        .custom-alert-info {
+                            background: #d1ecf1;
+                            border: 1px solid #bee5eb;
+                            color: #0c5460;
+                        }
+
+                        .custom-alert-content {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 12px 16px;
+                        }
+
+                        .custom-alert-message {
+                            flex: 1;
+                            font-weight: 500;
+                        }
+
+                        .custom-alert-close {
+                            background: none;
+                            border: none;
+                            font-size: 18px;
+                            cursor: pointer;
+                            padding: 0;
+                            margin-left: 10px;
+                            opacity: 0.7;
+                            transition: opacity 0.2s ease;
+                        }
+
+                        .custom-alert-close:hover {
+                            opacity: 1;
+                        }
+
+                        @keyframes slideDown {
+                            from {
+                                transform: translateX(-50%) translateY(-100%);
+                                opacity: 0;
+                            }
+                            to {
+                                transform: translateX(-50%) translateY(0);
+                                opacity: 1;
+                            }
+                        }
+
+                        @keyframes slideUp {
+                            from {
+                                transform: translateX(-50%) translateY(0);
+                                opacity: 1;
+                            }
+                            to {
+                                transform: translateX(-50%) translateY(-100%);
+                                opacity: 0;
+                            }
+                        }
+
+                        @media (max-width: 768px) {
+                            .custom-alert {
+                                left: 20px;
+                                right: 20px;
+                                transform: none;
+                                min-width: auto;
+                            }
+                            
+                            @keyframes slideUp {
+                                from {
+                                    transform: none;
+                                    opacity: 1;
+                                }
+                                to {
+                                    transform: translateY(-100%);
+                                    opacity: 0;
+                                }
+                            }
+                        }
+                    `;
+                    document.head.appendChild(styles);
+                }
+
+                // Add to page
+                document.body.appendChild(alert);
+
+                // Auto remove after 4 seconds
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.style.animation = 'slideUp 0.3s ease';
+                        setTimeout(() => alert.remove(), 300);
+                    }
+                }, 4000);
+
+                // Close button functionality
+                const closeBtn = alert.querySelector('.custom-alert-close');
+                closeBtn.addEventListener('click', () => {
+                    alert.style.animation = 'slideUp 0.3s ease';
+                    setTimeout(() => alert.remove(), 300);
+                });
+            }
+
+            // Initialize the page
+            updateOTPInputs();
+            startTimer();
+            currentOtpInputs[0].focus();
+        });
+    </script>
+</body>
+</html>
+

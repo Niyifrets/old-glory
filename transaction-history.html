@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Old Glory Bank | transaction-history</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self'; 
+                 script-src 'self' 'unsafe-inline'; 
+                 style-src 'self' 'unsafe-inline'; 
+                 img-src 'self' data:;
+                 form-action 'self';
+                 frame-ancestors 'none';">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <style>
+    /* Basic reset and fonts */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      background: #f4f5f6;
+      color: #222;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Account Restriction Banner */
+    .restriction-banner {
+      background: rgba(211, 52, 71, 0.95);
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 15px;
+      border-bottom: 1px solid rgba(180, 40, 55, 0.9);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 1000;
+      position: sticky;
+      top: 0;
+    }
+
+    /* Top header */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #e6e6e6;
+      padding: 12px 28px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .brand .logo {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .bank-logo {
+      height: 40px;
+      width: auto;
+    }
+    .brand .fdic {
+      font-size:12px;color:#6b6b6b;
+    }
+    .user {
+      font-size:13px;color:#333;text-align:right;
+    }
+    .user .small { font-size:12px;color:#888; }
+
+    /* secondary nav */
+    .subnav {
+      background:#fff;
+      border-bottom:1px solid #eaeaea;
+      padding:10px 28px;
+    }
+    .subnav .links {
+      display:flex;gap:22px;align-items:center;flex-wrap:wrap;
+    }
+    .subnav a { color:#163c6b;text-decoration:none;font-weight:600;font-size:15px; }
+    .subnav a:hover { color:#0f2a4d; }
+
+    /* page container (white card area like screenshot) */
+    .page {
+      max-width:1200px;
+      margin:24px auto;
+      background: #fff;
+      border-radius:6px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .page-inner { padding:22px; }
+
+    /* Back link */
+    .back {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:#163c6b;
+      text-decoration:none;
+      font-weight:600;
+      margin-bottom:14px;
+    }
+
+    /* Account header */
+    .account-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:20px;
+      border-bottom:1px solid #e6e6e6;
+      padding-bottom:18px;
+    }
+    .account-left {
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .account-logo {
+      width:48px; 
+      height:48px; 
+      border-radius:50%;
+      object-fit: cover;
+    }
+    .acct-meta h1 {
+      margin:0;font-size:24px;font-weight:700;color:#111;
+    }
+    .acct-meta .updated {
+      margin-top:6px;font-size:13px;color:#666;
+    }
+
+    .balances {
+      text-align:right;
+      min-width:220px;
+    }
+    .balances .val {
+      font-size:20px;font-weight:700;color:#111;
+    }
+    .balances .label {
+      font-size:13px;color:#6b6b6b;
+    }
+    .balances .two {
+      display:flex;
+      gap:24px;
+      justify-content:flex-end;
+      align-items:center;
+    }
+
+    /* Tabs */
+    .tabs {
+      display:flex;
+      gap:22px;
+      margin:18px 0;
+      border-bottom:1px solid #e9e9e9;
+      padding-bottom:8px;
+      align-items:center;
+    }
+    .tab {
+      padding-bottom:10px;
+      cursor:pointer;
+      color:#666;
+      font-weight:600;
+      font-size:15px;
+    }
+    .tab.active {
+      color:#163c6b;
+      border-bottom:3px solid #163c6b;
+    }
+
+    /* search bar row */
+    .search-row {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:16px 0 8px;
+      padding-top:6px;
+    }
+    .search-box {
+      flex:1;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:6px;
+      padding:10px 12px;
+    }
+    .search-box input {
+      border:0;outline:0;width:100%;font-size:15px;
+    }
+    .icons {
+      display:flex;gap:10px;align-items:center;padding-left:6px;
+    }
+    .icon-btn {
+      width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;border:1px solid #eee;background:#fafafa;cursor:pointer;
+    }
+
+    /* table header for Date / Description / Amount */
+    .tx-header {
+      display:grid;
+      grid-template-columns:140px 1fr 160px;
+      gap:12px;
+      align-items:center;
+      padding:10px 6px;
+      border-top:1px solid #eaeaea;
+      border-bottom:1px solid #eaeaea;
+      font-weight:700;
+      color:#555;
+      font-size:13px;
+    }
+
+    /* transaction rows */
+    .tx-list { display:block; }
+    .tx-row {
+      display:grid;
+      grid-template-columns:140px 1fr 160px;
+      gap:12px;
+      align-items:center;
+      padding:14px 6px;
+      border-bottom:1px solid #f0f0f0;
+      background: #fff;
+      transition: background .15s;
+    }
+    .tx-row:hover { background:#fbfbfb; }
+
+    .tx-date {
+      color:#666;font-size:13px;
+      display:flex;flex-direction:column;gap:6px;align-items:flex-start;
+    }
+    .tx-date .d { font-weight:700;color:#333; }
+    .tx-desc { font-size:15px;color:#2b2b2b;font-weight:700; }
+    .tx-desc .sub { display:block;font-size:13px;color:#7a7a7a;margin-top:6px;font-weight:600; }
+    .tx-amount { text-align:right;font-size:16px;font-weight:700; }
+
+    .amt-positive { color:#1a8f3a; } /* green */
+    .amt-negative { color:#d4443e; } /* red */
+
+    .tx-row .menu { text-align:center;color:#888;cursor:pointer;padding-left:8px; }
+
+    /* totals footer like the image */
+    .totals {
+      padding:12px 6px;
+      font-weight:700;
+      color:#111;
+      text-align:right;
+      font-size:14px;
+    }
+
+    /* responsive */
+    @media (max-width:900px) {
+      .tx-header, .tx-row {
+        grid-template-columns:120px 1fr 120px;
+      }
+      .balances { min-width:160px; text-align:left; }
+      .account-header { flex-direction:column; align-items:flex-start; gap:12px; }
+    }
+    @media (max-width:600px) {
+      .tx-header { display:none; }
+      .tx-row { grid-template-columns:1fr; padding:12px; }
+      .tx-date { flex-direction:row; gap:12px; align-items:center; }
+      .tx-amount { text-align:left;margin-top:8px;display:block; }
+      .totals { text-align:left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Account Restriction Banner -->
+  <div class="restriction-banner">
+    <span class="warning-icon">⚠️</span>
+    ACCOUNT UNDER REVIEW - All transactions may be temporarily restricted. Contact Customer Support for assistance.
+  </div>
+
+  <!-- Top header -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <img src="images/logo.webp" alt="Old Glory Bank" class="bank-logo">
+      </div>
+      <div class="fdic">
+        <div style="font-weight:700">FDIC</div>
+        <div style="font-size:12px;color:#6b6b6b">FDIC-Insured - Backed by the full faith and credit of the U.S. Government</div>
+      </div>
+    </div>
+
+    <div class="user">
+      Good Afternoon, <strong>RALPH KRUTULIS</strong><br>
+      <span class="small">Last login 09/11/2025 at 1:06 PM</span>
+    </div>
+  </div>
+
+  <!-- sub navigation -->
+  <div class="subnav">
+    <div class="links" style="max-width:1200px;margin:0 auto;">
+      <a href="#">Home</a>
+      <a href="#">Statement Images</a>
+      <a href="#">Services</a>
+      <a href="#">Settings</a>
+      <a href="#">Messages <span style="background:#2b2b2b;color:#fff;border-radius:50%;padding:2px 6px;margin-left:8px;font-size:12px">2</span></a>
+      <a href="#">Old Glory Nation</a>
+      <a href="#" id="logOffLink">Log Off</a>
+    </div>
+  </div>
+
+  <!-- Page card -->
+  <div class="page" role="main">
+    <div class="page-inner">
+
+      <a class="back" href="dashboard.html">← Back</a>
+
+      <div class="account-header">
+        <div class="account-left">
+          <img src="images/footerlogo.webp" alt="Account" class="account-logo">
+          <div class="acct-meta">
+            <h1>Freedom Checking 9459</h1>
+            <div class="updated">Last Updated: September 14, 2025 12:58 PM</div>
+          </div>
+        </div>
+
+        <div class="balances">
+          <div class="two">
+            <div>
+              <div class="val">$9,760,587.98</div>
+              <div class="label">Current Balance</div>
+            </div>
+            <div>
+              <div class="val">$9,760,587.98</div>
+              <div class="label">Available Balance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active">Transactions</div>
+        <div class="tab">Details & Settings</div>
+      </div>
+
+      <div class="search-row">
+        <div class="search-box" style="min-width:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="opacity:.6" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-4.35-4.35" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="searchInput" placeholder="Search transactions (optional)" />
+        </div>
+
+        <div class="icons">
+          <div class="icon-btn" title="Search">🔍</div>
+          <div class="icon-btn" title="Filter">⚑</div>
+          <div class="icon-btn" title="Download">⬇️</div>
+          <div class="icon-btn" title="More">⋮</div>
+        </div>
+      </div>
+
+      <!-- table header -->
+      <div class="tx-header" aria-hidden>
+        <div>Date</div>
+        <div>Description</div>
+        <div>Amount</div>
+      </div>
+
+      <!-- transactions list -->
+      <div class="tx-list" id="txList">
+
+        <!-- Rows will be injected by JS exactly matching your PDF details -->
+      </div>
+
+      <!-- totals footer -->
+      <div class="totals" id="totalsFooter"></div>
+
+    </div>
+  </div>
+
+  <script>
+    // Security: Add CSRF protection
+    const generateCSRFToken = () => {
+      return 'csrf_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    };
+
+    const csrfToken = generateCSRFToken();
+    sessionStorage.setItem('csrfToken', csrfToken);
+
+    // Security: Verify authentication before loading transactions
+    const checkAuthentication = () => {
+      const otpVerified = sessionStorage.getItem('otpVerified');
+      const verifiedAt = sessionStorage.getItem('verifiedAt');
+      
+      // Check if OTP was verified and within reasonable time (1 hour)
+      if (!otpVerified || !verifiedAt) {
+        showSecurityAlert('Authentication required. Redirecting to login...');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return false;
+      }
+      
+      const verificationTime = parseInt(verifiedAt);
+      const currentTime = Date.now();
+      const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+      
+      if (currentTime - verificationTime > oneHour) {
+        showSecurityAlert('Session expired. Please login again.');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return false;
+      }
+      
+      return true;
+    };
+
+    // Security: Show security alert
+    function showSecurityAlert(message) {
+      const alert = document.createElement('div');
+      alert.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #f8d7da;
+        color: #721c24;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border: 1px solid #f5c6cb;
+        z-index: 10000;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      `;
+      alert.textContent = message;
+      document.body.appendChild(alert);
+      
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.remove();
+        }
+      }, 5000);
+    }
+
+    // Security: Input sanitization for search
+    const sanitizeInput = (input) => {
+      return input.replace(/[<>]/g, '').trim();
+    };
+
+    // Helper function to add days to a date
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    // Helper function to format date as "MMM DD, YYYY" with leading zero
+    function formatDate(date) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${months[date.getMonth()]} ${day}, ${date.getFullYear()}`;
+    }
+
+    // Generate random transactions between June 30, 2024 and July 07, 2025
+    function generateRandomTransactions() {
+      const startDate = new Date('2024-06-30');
+      const endDate = new Date('2025-07-07');
+      const transactions = [];
+      
+      let currentDate = new Date(startDate);
+      let currentBalance = 8503500.00; // Starting balance from June 30, 2024
+      
+      // Business-related transaction descriptions
+      const incomeDescriptions = [
+        "Client Payment - Project Completion",
+        "Consulting Fee - Q3 Services",
+        "Contract Milestone - Tech Division",
+        "Investment Return - Capital Fund",
+        "Vendor Rebate - Annual Program",
+        "Service Revenue - Maintenance Contract",
+        "License Fee - Software Platform",
+        "Royalty Payment - IP Licensing"
+      ];
+      
+      const expenseDescriptions = [
+        "Office Supplies - Monthly Order",
+        "Utility Payment - Electricity/Water",
+        "Software Subscription - Cloud Services",
+        "Marketing Expense - Digital Campaign",
+        "Travel Reimbursement - Business Trip",
+        "Professional Fees - Legal Services",
+        "Equipment Maintenance - IT Infrastructure",
+        "Insurance Premium - Business Policy"
+      ];
+      
+      // Generate transactions with 1-2 day intervals
+      while (currentDate <= endDate) {
+        // Randomly decide if this will be an income or expense transaction
+        const isIncome = Math.random() > 0.6; // 40% chance of income, 60% chance of expense
+        
+        if (isIncome) {
+          // Generate income transaction
+          const amount = Math.round((Math.random() * 150000 + 50000) * 100) / 100; // $50,000 - $200,000
+          currentBalance += amount;
+          transactions.push({
+            date: formatDate(currentDate),
+            title: incomeDescriptions[Math.floor(Math.random() * incomeDescriptions.length)],
+            type: "Income",
+            amount: amount,
+            balance: currentBalance
+          });
+        } else {
+          // Generate expense transaction
+          const amount = Math.round((Math.random() * 80000 + 20000) * 100) / 100; // $20,000 - $100,000
+          currentBalance -= amount;
+          transactions.push({
+            date: formatDate(currentDate),
+            title: expenseDescriptions[Math.floor(Math.random() * expenseDescriptions.length)],
+            type: "Transfer",
+            amount: -amount,
+            balance: currentBalance
+          });
+        }
+        
+        // Move to next date (1-2 days later)
+        const daysToAdd = Math.random() > 0.5 ? 1 : 2;
+        currentDate = addDays(currentDate, daysToAdd);
+      }
+      
+      return transactions;
+    }
+
+    // Logout function
+    function handleLogout() {
+      // Clear session storage
+      sessionStorage.removeItem('otpVerified');
+      sessionStorage.removeItem('verifiedAt');
+      sessionStorage.removeItem('csrfToken');
+      
+      // Show logout message
+      showSecurityAlert('You have been successfully logged out.');
+      
+      // Redirect to login page after delay
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1500);
+    }
+
+    // Transaction data with additional transactions starting from March 13, 2024
+    const transactions = [
+      // New transactions from March 13, 2024
+      { date: "Mar 13, 2024", title: "Initial Business Capital Deposit", type: "Income", amount: 2500000.00, balance: 2500000.00 },
+      { date: "Mar 15, 2024", title: "Office Lease Payment - Downtown Tower", type: "Transfer", amount: -125000.00, balance: 2375000.00 },
+      { date: "Mar 18, 2024", title: "Equipment Purchase - Tech Systems Inc", type: "Transfer", amount: -387500.00, balance: 1987500.00 },
+      { date: "Mar 22, 2024", title: "Client Advance - Global Solutions Corp", type: "Income", amount: 1500000.00, balance: 3487500.00 },
+      { date: "Mar 25, 2024", title: "Payroll Processing - Q1 2024", type: "Transfer", amount: -425000.00, balance: 3062500.00 },
+      { date: "Mar 28, 2024", title: "Vendor Payment - Office Supplies Plus", type: "Transfer", amount: -87500.00, balance: 2975000.00 },
+      { date: "Apr 02, 2024", title: "Consulting Fee - Strategic Partners LLC", type: "Income", amount: 875000.00, balance: 3850000.00 },
+      { date: "Apr 05, 2024", title: "Software Licensing - Annual Renewal", type: "Transfer", amount: -156000.00, balance: 3694000.00 },
+      { date: "Apr 09, 2024", title: "Project Completion Bonus - Tech Division", type: "Income", amount: 625000.00, balance: 4319000.00 },
+      { date: "Apr 12, 2024", title: "Marketing Campaign - Digital Ads", type: "Transfer", amount: -234000.00, balance: 4085000.00 },
+      { date: "Apr 16, 2024", title: "Equipment Maintenance Contract", type: "Transfer", amount: -89000.00, balance: 3996000.00 },
+      { date: "Apr 20, 2024", title: "Client Payment - Enterprise Solutions", type: "Income", amount: 1875000.00, balance: 5871000.00 },
+      { date: "Apr 25, 2024", title: "Quarterly Tax Payment - Federal", type: "Transfer", amount: -425000.00, balance: 5446000.00 },
+      { date: "Apr 28, 2024", title: "Employee Benefits - Health Insurance", type: "Transfer", amount: -187000.00, balance: 5259000.00 },
+      { date: "May 03, 2024", title: "Contract Milestone Payment - MegaCorp", type: "Income", amount: 1125000.00, balance: 6384000.00 },
+      { date: "May 07, 2024", title: "Office Renovation - BuildRight Contractors", type: "Transfer", amount: -315000.00, balance: 6069000.00 },
+      { date: "May 12, 2024", title: "Professional Development Training", type: "Transfer", amount: -125000.00, balance: 5944000.00 },
+      { date: "May 18, 2024", title: "Client Retainer - Annual Contract", type: "Income", amount: 950000.00, balance: 6894000.00 },
+      { date: "May 22, 2024", title: "Vendor Settlement - Legal Fees", type: "Transfer", amount: -187500.00, balance: 6706500.00 },
+      { date: "May 27, 2024", title: "Quarterly Dividend Distribution", type: "Income", amount: 425000.00, balance: 7131500.00 },
+      { date: "Jun 01, 2024", title: "Monthly Operating Expenses", type: "Transfer", amount: -298000.00, balance: 6833500.00 },
+      { date: "Jun 05, 2024", title: "Consulting Revenue - Q2 Projects", type: "Income", amount: 1375000.00, balance: 8208500.00 },
+      { date: "Jun 10, 2024", title: "Technology Upgrade - Server Infrastructure", type: "Transfer", amount: -456000.00, balance: 7752500.00 },
+      { date: "Jun 15, 2024", title: "Client Payment - International Division", type: "Income", amount: 825000.00, balance: 8577500.00 },
+      { date: "Jun 20, 2024", title: "Payroll Processing - Q2 2024", type: "Transfer", amount: -512000.00, balance: 8065500.00 },
+      { date: "Jun 25, 2024", title: "Business Insurance Premium", type: "Transfer", amount: -187000.00, balance: 7878500.00 },
+      { date: "Jun 30, 2024", title: "Quarterly Performance Bonus", type: "Income", amount: 625000.00, balance: 8503500.00 },
+
+      // Add generated random transactions between June 30, 2024 and July 07, 2025
+      ...generateRandomTransactions(),
+
+      // Original transactions (kept for continuity)
+      { date: "Jul 07, 2025", title: "Payment to Atlas Engineering Co.", type: "Transfer", amount: -320000.00, balance: 8183500.00 },
+      { date: "Jul 08, 2025", title: "Wire Transfer from Delta Engineering Ltd.", type: "Income", amount: 850000.00, balance: 9033500.00 },
+      { date: "Jul 10, 2025", title: "Payment to SteelGrid Fabricators (Steel beams)", type: "Transfer", amount: -185450.00, balance: 8848050.00 },
+      { date: "Jul 11, 2025", title: "AutoPay: Site Equipment Lease (BuildPro)", type: "Transfer", amount: -29800.00, balance: 8818250.00 },
+      { date: "Jul 15, 2025", title: "Payment to Nova Engineering Consultants", type: "Transfer", amount: -97320.00, balance: 8720930.00 },
+      { date: "Jul 20, 2025", title: "Deposit: Project Mobilization Advance (private Contract)", type: "Income", amount: 2000000.00, balance: 10720930.00 },
+      { date: "Jul 25, 2025", title: "Payment to GroundCore Civil Works (Phase 2)", type: "Transfer", amount: -715000.00, balance: 10005930.00 },
+      { date: "Aug 01, 2025", title: "ACH Transfer to Structura Engineering (Design Fees)", type: "Transfer", amount: -143200.00, balance: 9862730.00 },
+      { date: "Aug 04, 2025", title: "Payment: Material Supply - Titan Concrete LLC", type: "Transfer", amount: -210675.00, balance: 9652055.00 },
+      { date: "Aug 07, 2025", title: "Deposit: Client Payment (SkyBridge Project)", type: "Income", amount: 1450000.00, balance: 11102055.00 },
+      { date: "Aug 10, 2025", title: "Payment to Elevate Scaffolding Services", type: "Transfer", amount: -48900.00, balance: 11053155.00 },
+      { date: "Aug 12, 2025", title: "Transfer to Subcontractor: Vertex Foundation", type: "Transfer", amount: -395000.00, balance: 10658155.00 },
+      { date: "Aug 14, 2025", title: "Purchase: Safety Equipment (SiteGuard Ltd.)", type: "Transfer", amount: -34980.00, balance: 10623175.00 },
+      { date: "Aug 15, 2025", title: "Payment to Apex Engineering Surveys", type: "Transfer", amount: -61300.00, balance: 10561875.00 },
+      { date: "Aug 15, 2025", title: "Monthly Interest Credit", type: "Income", amount: 8412.55, balance: 10570287.55 },
+      
+      // Additional transactions to reach target balance
+      { date: "Aug 20, 2025", title: "Business Development Fund - Return", type: "Income", amount: 425000.00, balance: 10995287.55 },
+      { date: "Aug 25, 2025", title: "Strategic Investment - Capital Return", type: "Income", amount: 312500.00, balance: 11307787.55 },
+      { date: "Aug 28, 2025", title: "Quarterly Vendor Settlement", type: "Transfer", amount: -875000.00, balance: 10432787.55 },
+      { date: "Sep 01, 2025", title: "Monthly Operating Capital", type: "Transfer", amount: -456287.57, balance: 9976500.00 },
+      { date: "Sep 05, 2025", title: "Final Project Completion Bonus", type: "Income", amount: 215000.00, balance: 10191500.00 },
+      { date: "Sep 10, 2025", title: "Annual License Renewals", type: "Transfer", amount: -125000.00, balance: 10066500.00 },
+      { date: "Sep 12, 2025", title: "Equipment Sale Proceeds", type: "Income", amount: 287500.00, balance: 10354000.00 },
+      { date: "Sep 14, 2025", title: "Quarterly Tax Adjustment", type: "Transfer", amount: -593412.02, balance: 9760587.98 }
+    ];
+
+    // Format number with commas and 2 decimal places
+    function formatCurrency(n) {
+      const sign = n < 0 ? '-' : '';
+      const abs = Math.abs(n);
+      return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+
+    // Render transactions
+    const txList = document.getElementById('txList');
+    
+    // Sort transactions from newest to oldest
+    const sortedTransactions = [...transactions].reverse();
+    
+    // Security: Check authentication before rendering
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!checkAuthentication()) {
+        return;
+      }
+
+      renderTransactions();
+      setupEventListeners();
+    });
+
+    function renderTransactions() {
+      sortedTransactions.forEach(tx => {
+        const row = document.createElement('div');
+        row.className = 'tx-row';
+
+        // Date column
+        const dateCol = document.createElement('div');
+        dateCol.className = 'tx-date';
+        dateCol.innerHTML = `<div class="d">${tx.date}</div><div style="font-size:12px;color:#999;">${tx.date.includes('2024')? '2024':tx.date.includes('2025')?'2025':''}</div>`;
+        // Description column
+        const descCol = document.createElement('div');
+        descCol.className = 'tx-desc';
+        descCol.innerHTML = `${tx.title}<span class="sub">${tx.type}</span>`;
+
+        // Amount column (with small balance line under amount)
+        const amtCol = document.createElement('div');
+        amtCol.className = 'tx-amount';
+        const amtSpan = document.createElement('div');
+        amtSpan.style.fontWeight = 800;
+        amtSpan.textContent = formatCurrency(tx.amount);
+        amtSpan.className = tx.amount >= 0 ? 'amt-positive' : 'amt-negative';
+        const balSpan = document.createElement('div');
+        balSpan.style.fontSize = '13px';
+        balSpan.style.color = '#777';
+        balSpan.style.marginTop = '6px';
+        balSpan.textContent = formatCurrency(tx.balance);
+        amtCol.appendChild(amtSpan);
+        amtCol.appendChild(balSpan);
+
+        // optional menu column (three dots) — put into amount column aligned right
+        const menu = document.createElement('div');
+        menu.className = 'menu';
+        menu.innerHTML = '⋮';
+        menu.title = 'More';
+
+        // append children into row grid: date, desc, amount + menu
+        row.appendChild(dateCol);
+        row.appendChild(descCol);
+
+        // Wrap amount and menu into a small container for alignment
+        const rightWrap = document.createElement('div');
+        rightWrap.style.display = 'flex';
+        rightWrap.style.justifyContent = 'flex-end';
+        rightWrap.style.alignItems = 'center';
+        rightWrap.style.gap = '12px';
+        rightWrap.appendChild(amtCol);
+        rightWrap.appendChild(menu);
+
+        row.appendChild(rightWrap);
+
+        txList.appendChild(row);
+      });
+
+      // compute totals (credits and debits) and render footer totals
+      const credits = transactions.filter(t => t.amount > 0);
+      const debits = transactions.filter(t => t.amount < 0);
+      const sumCredits = credits.reduce((s, t) => s + t.amount, 0);
+      const sumDebits = debits.reduce((s, t) => s + Math.abs(t.amount), 0);
+
+      const totalsFooter = document.getElementById('totalsFooter');
+      totalsFooter.innerHTML = `Page totals: Credits: [${credits.length}] ${formatCurrency(sumCredits)} | Debits: [${debits.length}] -${formatCurrency(sumDebits).replace('$','')}`;
+    }
+
+    function setupEventListeners() {
+      // Optional: search filter (basic) with sanitization
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', function() {
+        const q = sanitizeInput(this.value.trim().toLowerCase());
+        const rows = document.querySelectorAll('.tx-row');
+        sortedTransactions.forEach((tx, idx) => {
+          const row = rows[idx];
+          const text = (tx.title + ' ' + tx.type + ' ' + tx.date).toLowerCase();
+          row.style.display = text.includes(q) ? '' : 'none';
+        });
+      });
+
+      // Security: Add rate limiting for search
+      let searchTimeout;
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          const q = sanitizeInput(this.value.trim().toLowerCase());
+          const rows = document.querySelectorAll('.tx-row');
+          sortedTransactions.forEach((tx, idx) => {
+            const row = rows[idx];
+            const text = (tx.title + ' ' + tx.type + ' ' + tx.date).toLowerCase();
+            row.style.display = text.includes(q) ? '' : 'none';
+          });
+        }, 300); // 300ms delay
+      });
+
+      // Accessibility: allow clicking menu to show an alert (dummy)
+      document.querySelectorAll('.menu').forEach((m, i) => {
+        m.addEventListener('click', () => {
+          alert('Transaction options (dummy) — ' + sortedTransactions[i].title);
+        });
+      });
+
+      // Add logout functionality
+      const logOffLink = document.getElementById('logOffLink');
+      logOffLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        handleLogout();
+      });
+    }
+
+    // Security: Add session timeout warning
+    let inactivityTime = 0;
+    const sessionTimeout = 30 * 60 * 1000; // 30 minutes
+    
+    function resetInactivityTimer() {
+      inactivityTime = 0;
+    }
+    
+    function checkInactivity() {
+      inactivityTime += 1000;
+      if (inactivityTime >= sessionTimeout - 60000) { // Warn 1 minute before timeout
+        showSecurityAlert('Your session will expire in 1 minute due to inactivity.');
+      }
+      if (inactivityTime >= sessionTimeout) {
+        showSecurityAlert('Session expired due to inactivity.');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+      }
+    }
+    
+    // Reset timer on user activity
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('keypress', resetInactivityTimer);
+    document.addEventListener('click', resetInactivityTimer);
+    
+    // Check inactivity every second
+    setInterval(checkInactivity, 1000);
+  </script>
+</body>
+</html>
+
