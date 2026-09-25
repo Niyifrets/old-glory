@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Old Glory Bank | Dashboard</title>
   
-  <!-- Security Headers -->
   <meta http-equiv="Content-Security-Policy" 
         content="default-src 'self'; 
                  script-src 'self' 'unsafe-inline'; 
@@ -21,111 +20,22 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* Loading Screen Styles */
-    #initialLoadingScreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
+    #initialLoadingScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease; }
+    #initialLoadingScreen.fade-out { opacity: 0; pointer-events: none; }
+    .initial-spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    .initial-loading-text { font-size: 18px; font-weight: 600; color: var(--accent); font-family: 'Nunito', system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial; }
     
-    #initialLoadingScreen.fade-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-    
-    .initial-spinner {
-      width: 60px;
-      height: 60px;
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-    
-    .initial-loading-text {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent);
-      font-family: 'Nunito', system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial;
-    }
-    
-    :root{
-      --bg:#f6f6f6;
-      --card:#ffffff;
-      --muted:#7a7a7a;
-      --accent:#0b4b8a;
-      --accent-2:#e85a00;
-      --shadow: 0 6px 18px rgba(19,24,33,0.08);
-      --radius:12px;
-    }
+    :root{ --bg:#f6f6f6; --card:#ffffff; --muted:#7a7a7a; --accent:#0b4b8a; --accent-2:#e85a00; --shadow: 0 6px 18px rgba(19,24,33,0.08); --radius:12px; }
     *{box-sizing:border-box}
     body{font-family:'Nunito',system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#222;background:var(--bg);margin:0}
     
-    /* Account Warning Banner */
-    .account-warning-banner {
-      background: linear-gradient(135deg, #d63447 0%, #b02535 100%);
-      color: white;
-      padding: 12px 0;
-      text-align: center;
-      font-weight: 600;
-      font-size: 14px;
-      border-bottom: 1px solid #a02030;
-      box-shadow: 0 2px 8px rgba(211, 52, 71, 0.3);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      width: 100%;
-    }
-    
-    .account-warning-banner .warning-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    
-    .account-warning-banner .warning-icon {
-      font-size: 16px;
-      animation: pulse 2s infinite;
-    }
-    
-    .account-warning-banner .contact-link {
-      color: white;
-      text-decoration: underline;
-      font-weight: 700;
-      margin-left: 5px;
-    }
-    
-    .account-warning-banner .contact-link:hover {
-      opacity: 0.9;
-    }
-    
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
-
-    .topbar{background:#fff;border-bottom:1px solid #e6e6e6;padding:10px 22px;display:flex;align-items:center;justify-content:space-between; position: sticky; top: 44px; z-index: 999;}
+    .topbar{background:#fff;border-bottom:1px solid #e6e6e6;padding:10px 22px;display:flex;align-items:center;justify-content:space-between; position: sticky; top: 0; z-index: 999;}
     .brand{display:flex;align-items:center;gap:16px}
     .bank-logo{height:40px;width:auto;}
     .fdic{font-size:12px;color:var(--muted)}
     .user-area{text-align:right;font-size:13px;color:#333}
     .user-area .last{font-size:12px;color:var(--muted)}
-    nav{background:#fff;padding:12px 22px;border-bottom:1px solid #efefef; position: sticky; top: 88px; z-index: 998;}
+    nav{background:#fff;padding:12px 22px;border-bottom:1px solid #efefef; position: sticky; top: 60px; z-index: 998;}
     .nav-list{display:flex;gap:22px;align-items:center}
     .nav-list a{color:#333;text-decoration:none;font-weight:600}
     .nav-list .badge{background:#222;color:#fff;border-radius:50%;padding:4px 7px;font-size:12px;margin-left:6px}
@@ -133,13 +43,13 @@
     .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
     .accounts .account{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:10px;border:1px solid #f0f0f0;margin-bottom:16px}
     .account .title{display:flex;align-items:center;gap:8px;font-weight:700}
-    .balance{font-size:28px;font-weight:800}
+    .balance{font-size:28px;font-weight:800;transition: color 0.3s;}
+    .balance.updated { color: #2c9b5a; }
     .small{font-size:13px;color:var(--muted)}
     .negative{color:#d63447}
     .green{color:#2c9b5a}
     .btn-outline{display:inline-block;width:100%;text-align:center;padding:10px 0;border:2px solid var(--accent);border-radius:8px;background:transparent;font-weight:700;color:var(--accent);cursor:pointer;transition:.3s}
     .btn-outline:hover{background:var(--accent);color:#fff}
-    .hero-banner{height:180px;border-radius:10px;overflow:hidden;background-image:linear-gradient(90deg,#12263b 0%,#1b3a5a 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700}
     .money-management{min-height:80px}
     .recent h3{margin:0 0 12px 0}
     .recent .item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f2f2f2}
@@ -147,208 +57,156 @@
     .scam{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;background:linear-gradient(90deg,#ff8a00,#ffb366);color:#fff}
     .scam button{background:rgba(255,255,255,0.08);border:0;padding:8px 10px;border-radius:6px;color:#fff;font-weight:700}
     @media (max-width:1080px){.container{grid-template-columns:1fr;}}
-    .accounts .account .flag{width:28px;height:18px;border-radius:3px;background:linear-gradient(90deg,#c62828 0,#fff 50%,#0b4b8a 100%);display:inline-block}
     .reveal{opacity:0;transform:translateY(8px);transition:all .6s ease}
     .reveal.visible{opacity:1;transform:none}
-    
-    /* Improved accessibility */
-    .btn-outline:focus, .scam button:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-    .nav-list a:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 4px;
-    }
+    .btn-outline:focus, .scam button:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .nav-list a:focus { outline: 2px solid var(--accent); outline-offset: 4px; }
 
-    /* Financial Overview Styles */
-    .financial-overview {
-      margin-top: 22px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-
-    .chart-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .circle-chart {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: conic-gradient(
-        #0b4b8a 0% 35%,
-        #e85a00 35% 65%,
-        #2c9b5a 65% 85%,
-        #7a7a7a 85% 100%
-      );
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .circle-chart::before {
-      content: '';
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      background: white;
-      border-radius: 50%;
-    }
-
-    .chart-total {
-      position: relative;
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--accent);
-      z-index: 1;
-    }
-
-    .chart-legend {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-    }
-
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
-    }
-
+    .financial-overview { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .chart-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .circle-chart { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(#0b4b8a 0% 35%,#e85a00 35% 65%,#2c9b5a 65% 85%,#7a7a7a 85% 100%); display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .circle-chart::before { content: ''; position: absolute; width: 100px; height: 100px; background: white; border-radius: 50%; }
+    .chart-total { position: relative; font-size: 20px; font-weight: 800; color: var(--accent); z-index: 1; }
+    .chart-legend { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .legend-color { width: 12px; height: 12px; border-radius: 2px; }
     .legend-business { background: #0b4b8a; }
     .legend-operations { background: #e85a00; }
     .legend-investments { background: #2c9b5a; }
     .legend-other { background: #7a7a7a; }
+    .period { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-    .period {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
+    .hero-banner-with-bg { height: 180px; border-radius: 10px; overflow: hidden; position: relative; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; }
+    .hero-banner-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('images/footerlogo.webp'); background-size: cover; background-position: center; filter: blur(8px); z-index: 5; }
+    .hero-banner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(18,38,59,0.85) 0%, rgba(27,58,90,0.85) 100%); z-index: 2; }
+    .hero-banner-content { position: relative; z-index: 3; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-    /* Blurred Background Hero Banner */
-    .hero-banner-with-bg {
-      height: 180px;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: 700;
-    }
+    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); display: none; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 20px; }
+    .loading-overlay.active { display: flex; }
+    .spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    .loading-text { font-size: 18px; font-weight: 600; color: var(--accent); }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    .hero-banner-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('images/footerlogo.webp');
-      background-size: cover;
-      background-position: center;
-      filter: blur(8px);
-      z-index: 5;
-    }
+    /* ===== TRANSFER MODAL ===== */
+    .transfer-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 18px; }
+    .transfer-modal-overlay.active { display: flex; }
+    .transfer-modal { background: #fff; border-radius: 16px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 48px rgba(0,0,0,0.25); animation: modalSlideUp 0.3s ease; padding: 28px 24px; position: relative; }
+    @keyframes modalSlideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .transfer-modal .close-btn { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 26px; color: #999; cursor: pointer; line-height: 1; padding: 4px 8px; border-radius: 6px; transition: 0.2s; }
+    .transfer-modal .close-btn:hover { background: #f0f0f0; color: #333; }
+    .transfer-modal h2 { margin: 0 0 6px 0; font-size: 24px; color: var(--accent); font-weight: 800; }
+    .transfer-modal .subhead { font-size: 14px; color: var(--muted); margin-bottom: 22px; }
+    .transfer-modal .field { margin-bottom: 16px; }
+    .transfer-modal .field label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 5px; color: #333; }
+    .transfer-modal .field input, .transfer-modal .field select { width: 100%; padding: 11px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 15px; font-family: 'Nunito', sans-serif; background: #fafafa; transition: border-color 0.2s; outline: none; }
+    .transfer-modal .field input:focus, .transfer-modal .field select:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(11,75,138,0.1); }
+    .transfer-modal .field .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .transfer-modal .field .balance-hint { font-size: 12px; color: var(--accent); margin-top: 4px; font-weight: 600; }
+    .transfer-modal .btn-primary { width: 100%; padding: 13px 0; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 17px; font-weight: 800; cursor: pointer; transition: 0.25s; margin-top: 8px; font-family: 'Nunito', sans-serif; }
+    .transfer-modal .btn-primary:hover { background: #093d70; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(11,75,138,0.3); }
+    .transfer-modal .btn-primary:active { transform: translateY(0); }
+    .transfer-modal .btn-primary:disabled { background: #b0c4d8; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    .hero-banner-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, rgba(18,38,59,0.85) 0%, rgba(27,58,90,0.85) 100%);
-      z-index: 2;
-    }
+    .sent-screen { text-align: center; padding: 20px 0 10px; }
+    .sent-screen .check-icon { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #2c9b5a, #3cc973); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 42px; color: #fff; animation: popIn 0.4s ease; }
+    @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+    .sent-screen h3 { font-size: 22px; color: #2c9b5a; margin: 0 0 8px 0; }
+    .sent-screen .amount-sent { font-size: 32px; font-weight: 800; color: #222; margin: 10px 0 6px; }
+    .sent-screen .detail { font-size: 14px; color: var(--muted); margin: 4px 0; }
+    .sent-screen .new-balance { font-size: 15px; color: var(--accent); font-weight: 700; margin: 12px 0 4px; padding: 8px 12px; background: #f0f6fc; border-radius: 8px; display: inline-block; }
+    .sent-screen .btn-done { margin-top: 22px; padding: 12px 40px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.25s; font-family: 'Nunito', sans-serif; }
+    .sent-screen .btn-done:hover { background: #093d70; }
 
-    .hero-banner-content {
-      position: relative;
-      z-index: 3;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
+    .transfer-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 0; background: var(--accent-2); color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.25s; font-family: 'Nunito', sans-serif; margin-top: 4px; }
+    .transfer-btn:hover { background: #cf4f00; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,90,0,0.35); }
+    .transfer-btn:active { transform: translateY(0); }
+    .transfer-btn:focus { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+    .button-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
 
-    /* Loading Overlay Styles */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .loading-overlay.active {
-      display: flex;
-    }
-
-    .spinner {
-      width: 60px;
-      height: 60px;
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    .loading-text {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @media (max-width: 600px) {
+      .transfer-modal { padding: 22px 16px; }
+      .transfer-modal h2 { font-size: 20px; }
+      .sent-screen .amount-sent { font-size: 26px; }
     }
   </style>
 </head>
 <body>
-  <!-- Initial Loading Screen -->
   <div id="initialLoadingScreen">
     <div class="initial-spinner"></div>
     <div class="initial-loading-text">Loading Dashboard...</div>
   </div>
 
-  <!-- Account Warning Banner -->
-  <div class="account-warning-banner">
-    <div class="warning-content">
-      <span class="warning-icon">⚠️</span>
-      ACCOUNT UNDER REVIEW - All transactions may be temporarily restricted. Contact 
-       Customer Support for assistance.
-    </div>
-  </div>
-
-  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <div class="loading-text">Loading Transaction History...</div>
+  </div>
+
+  <!-- ===== TRANSFER MODAL ===== -->
+  <div class="transfer-modal-overlay" id="transferModalOverlay">
+    <div class="transfer-modal" id="transferModal">
+      <button class="close-btn" id="closeTransferModal" aria-label="Close transfer dialog">&times;</button>
+
+      <!-- Transfer Form Screen -->
+      <div id="transferFormScreen">
+        <h2>💸 Transfer Money</h2>
+        <p class="subhead">Send funds from your account.</p>
+
+        <form id="transferForm" autocomplete="off">
+          <div class="field">
+            <label for="fromAccount">From Account</label>
+            <select id="fromAccount" required>
+              <option value="freedom-checking">FREEDOM CHECKING — *****9459</option>
+              <option value="business-savings">BUSINESS SAVINGS — *****3312</option>
+            </select>
+            <div class="balance-hint" id="fromAccountBalance">Available: $0.00</div>
+          </div>
+
+          <div class="field">
+            <label for="recipientName">Recipient Name</label>
+            <input type="text" id="recipientName" placeholder="e.g. John Smith" required maxlength="80" />
+          </div>
+
+          <div class="field">
+            <label for="recipientAccount">Recipient Account Number</label>
+            <input type="text" id="recipientAccount" placeholder="Enter account number" required maxlength="20" inputmode="numeric" pattern="[0-9]*" />
+            <div class="hint">Digits only, no spaces or dashes.</div>
+          </div>
+
+          <div class="field">
+            <label for="routingNumber">Routing Number</label>
+            <input type="text" id="routingNumber" placeholder="9-digit routing number" required maxlength="9" inputmode="numeric" pattern="[0-9]{9}" />
+            <div class="hint">Must be exactly 9 digits.</div>
+          </div>
+
+          <div class="field">
+            <label for="transferAmount">Amount (USD)</label>
+            <input type="number" id="transferAmount" placeholder="0.00" required min="0.01" step="0.01" />
+          </div>
+
+          <div class="field">
+            <label for="transferMemo">Memo (optional)</label>
+            <input type="text" id="transferMemo" placeholder="e.g. Invoice #1234" maxlength="100" />
+          </div>
+
+          <button type="submit" class="btn-primary" id="submitTransferBtn">Send Transfer</button>
+        </form>
+      </div>
+
+      <!-- Sent Confirmation Screen -->
+      <div id="sentScreen" style="display:none;">
+        <div class="sent-screen">
+          <div class="check-icon">✓</div>
+          <h3>Transfer Sent!</h3>
+          <div class="amount-sent" id="sentAmount">$0.00</div>
+          <div class="detail" id="sentRecipient">to Recipient</div>
+          <div class="detail" id="sentAccount">Account: ****</div>
+          <div class="detail" id="sentDate">Date: —</div>
+          <div class="detail" id="sentRef">Ref: —</div>
+          <div class="new-balance" id="sentNewBalance">New balance: $0.00</div>
+          <button class="btn-done" id="doneBtn">Done</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <header class="topbar">
@@ -384,19 +242,24 @@
 
       <div class="account">
         <div class="title">FREEDOM CHECKING <span class="small">*****9459</span></div>
-        <div class="balance">$1,785,000<span style="font-size:14px;vertical-align:super">98</span></div>
+        <div class="balance" id="freedomCheckingBalance">—</div>
         <div class="small">AVAILABLE BALANCE</div>
-        <div class="small">$1,785,000.98 CURRENT BALANCE</div>
+        <div class="small" id="freedomCheckingCurrent">—</div>
       </div>
 
       <div class="account">
         <div class="title">BUSINESS SAVINGS <span class="small">UPDATED A FEW SECONDS AGO</span></div>
-        <div class="balance">$12,001,156<span style="font-size:14px;vertical-align:super">55</span></div>
+        <div class="balance" id="businessSavingsBalance">—</div>
         <div class="small">CURRENT BALANCE</div>
-        <div class="small">$12,001,156.55 AVAILABLE BALANCE</div>
+        <div class="small" id="businessSavingsCurrent">—</div>
       </div>
 
-      <button class="btn-outline" id="viewAccountsBtn" aria-label="View all accounts">View All Accounts</button>
+      <div class="button-stack">
+        <button class="transfer-btn" id="openTransferBtn" aria-label="Open transfer money form">
+          ⚡ Transfer Money
+        </button>
+        <button class="btn-outline" id="viewAccountsBtn" aria-label="View all accounts">View All Accounts</button>
+      </div>
     </section>
 
     <section>
@@ -417,32 +280,17 @@
         </div>
       </div>
 
-      <!-- Financial Overview Section -->
       <div class="financial-overview">
         <div class="card reveal">
           <h3 style="margin-top:0;">FINANCIAL OVERVIEW</h3>
           <div class="chart-container">
-            <div class="circle-chart">
-              <div class="chart-total">$2.8M</div>
-            </div>
+            <div class="circle-chart"><div class="chart-total">$2.8M</div></div>
             <div class="period">Aug 1 - Aug 14, 2025</div>
             <div class="chart-legend">
-              <div class="legend-item">
-                <div class="legend-color legend-business"></div>
-                <div>Business Expenses: $980K</div>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color legend-operations"></div>
-                <div>Operations: $840K</div>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color legend-investments"></div>
-                <div>Investments: $560K</div>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color legend-other"></div>
-                <div>Other: $420K</div>
-              </div>
+              <div class="legend-item"><div class="legend-color legend-business"></div><div>Business Expenses: $980K</div></div>
+              <div class="legend-item"><div class="legend-color legend-operations"></div><div>Operations: $840K</div></div>
+              <div class="legend-item"><div class="legend-color legend-investments"></div><div>Investments: $560K</div></div>
+              <div class="legend-item"><div class="legend-color legend-other"></div><div>Other: $420K</div></div>
             </div>
           </div>
         </div>
@@ -450,18 +298,9 @@
         <div class="card reveal">
           <h3 style="margin-top:0;">QUICK STATS</h3>
           <div style="display:flex;flex-direction:column;gap:16px;margin-top:12px;">
-            <div>
-              <div class="small">Total Transactions</div>
-              <div style="font-size:20px;font-weight:700;color:var(--accent)">47</div>
-            </div>
-            <div>
-              <div class="small">Average Daily Spend</div>
-              <div style="font-size:20px;font-weight:700;color:var(--accent)">$200K</div>
-            </div>
-            <div>
-              <div class="small">Largest Transaction</div>
-              <div style="font-size:20px;font-weight:700;color:var(--accent)">$715K</div>
-            </div>
+            <div><div class="small">Total Transactions</div><div style="font-size:20px;font-weight:700;color:var(--accent)" id="totalTransactions">47</div></div>
+            <div><div class="small">Average Daily Spend</div><div style="font-size:20px;font-weight:700;color:var(--accent)">$200K</div></div>
+            <div><div class="small">Largest Transaction</div><div style="font-size:20px;font-weight:700;color:var(--accent)">$715K</div></div>
           </div>
         </div>
       </div>
@@ -476,229 +315,228 @@
 
       <h3>RECENT ACTIVITY</h3>
       
-      <div class="item">
-        <div>
-          <div style="font-weight:700">Monthly Interest Credit</div>
-          <div class="small meta">Interest Income — Freedom Checking</div>
+      <div id="recentActivityList">
+        <div class="item">
+          <div><div style="font-weight:700">Monthly Interest Credit</div><div class="small meta">Interest Income — Freedom Checking</div></div>
+          <div class="green">+$8,412.55</div>
         </div>
-        <div class="green">+$8,412.55</div>
-      </div>
-
-      <div class="item">
-        <div>
-          <div style="font-weight:700">Payment to Apex Engineering Surveys</div>
-          <div class="small meta">Business Payment — Freedom Checking</div>
+        <div class="item">
+          <div><div style="font-weight:700">Payment to Apex Engineering Surveys</div><div class="small meta">Business Payment — Freedom Checking</div></div>
+          <div class="negative">-$61,300.00</div>
         </div>
-        <div class="negative">-$61,300.00</div>
-      </div>
-
-      <div class="item">
-        <div>
-          <div style="font-weight:700">Purchase: Safety Equipment</div>
-          <div class="small meta">SiteGuard Ltd. — Freedom Checking</div>
+        <div class="item">
+          <div><div style="font-weight:700">Purchase: Safety Equipment</div><div class="small meta">SiteGuard Ltd. — Freedom Checking</div></div>
+          <div class="negative">-$34,980.00</div>
         </div>
-        <div class="negative">-$34,980.00</div>
-      </div>
-
-      <div class="item">
-        <div>
-          <div style="font-weight:700">Transfer to Subcontractor</div>
-          <div class="small meta">Vertex Foundation — Freedom Checking</div>
+        <div class="item">
+          <div><div style="font-weight:700">Transfer to Subcontractor</div><div class="small meta">Vertex Foundation — Freedom Checking</div></div>
+          <div class="negative">-$395,000.00</div>
         </div>
-        <div class="negative">-$395,000.00</div>
-      </div>
-
-      <div class="item">
-        <div>
-          <div style="font-weight:700">Payment to Elevate Scaffolding</div>
-          <div class="small meta">Services — Freedom Checking</div>
+        <div class="item">
+          <div><div style="font-weight:700">Payment to Elevate Scaffolding</div><div class="small meta">Services — Freedom Checking</div></div>
+          <div class="negative">-$48,900.00</div>
         </div>
-        <div class="negative">-$48,900.00</div>
       </div>
     </aside>
   </main>
 
+  <script src="bank-common.js"></script>
   <script>
-    // Security: Add CSRF protection
-    const generateCSRFToken = () => {
-      return 'csrf_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-    };
+    (function () {
+      'use strict';
+      const B = window.BankCommon;
 
-    const csrfToken = generateCSRFToken();
-    sessionStorage.setItem('csrfToken', csrfToken);
+      B.initCSRF();
 
-    // Security: Verify OTP verification before allowing access
-    const checkAuthentication = () => {
-      const otpVerified = sessionStorage.getItem('otpVerified');
-      const verifiedAt = sessionStorage.getItem('verifiedAt');
-      
-      // Check if OTP was verified and within reasonable time (1 hour)
-      if (!otpVerified || !verifiedAt) {
-        showSecurityAlert('Authentication required. Redirecting to login...');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-        return false;
+      document.addEventListener('DOMContentLoaded', function () {
+        if (!B.checkAuthentication()) return;
+
+        updateDashboardBalances();
+        renderSavedTransfers();
+
+        const loadingScreen = document.getElementById('initialLoadingScreen');
+        setTimeout(function () {
+          loadingScreen.classList.add('fade-out');
+          setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
+        }, 5000);
+
+        B.setupSessionTimeout();
+      });
+
+      function updateDashboardBalances() {
+        const b = B.getBalances();
+        document.getElementById('freedomCheckingBalance').innerHTML = B.formatBalanceHTML(b.freedomChecking);
+        document.getElementById('freedomCheckingCurrent').textContent = B.formatCurrency(b.freedomChecking) + ' CURRENT BALANCE';
+        document.getElementById('businessSavingsBalance').innerHTML = B.formatBalanceHTML(b.businessSavings);
+        document.getElementById('businessSavingsCurrent').textContent = B.formatCurrency(b.businessSavings) + ' AVAILABLE BALANCE';
       }
-      
-      const verificationTime = parseInt(verifiedAt);
-      const currentTime = Date.now();
-      const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
-      
-      if (currentTime - verificationTime > oneHour) {
-        showSecurityAlert('Session expired. Please login again.');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-        return false;
-      }
-      
-      return true;
-    };
 
-    // Security: Show security alert
-    function showSecurityAlert(message) {
-      const alert = document.createElement('div');
-      alert.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #f8d7da;
-        color: #721c24;
-        padding: 12px 20px;
-        border-radius: 8px;
-        border: 1px solid #f5c6cb;
-        z-index: 10000;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      `;
-      alert.textContent = message;
-      document.body.appendChild(alert);
-      
-      setTimeout(() => {
-        if (alert.parentNode) {
-          alert.remove();
+      function flashBalance(el) {
+        if (!el) return;
+        el.classList.add('updated');
+        setTimeout(() => el.classList.remove('updated'), 1500);
+      }
+
+      function renderSavedTransfers() {
+        const saved = B.getSavedTransactions();
+        const list = document.getElementById('recentActivityList');
+        if (!list) return;
+        [...saved].reverse().forEach(tx => {
+          const item = document.createElement('div');
+          item.className = 'item';
+          item.innerHTML = `
+            <div>
+              <div style="font-weight:700">${tx.title}</div>
+              <div class="small meta">Outgoing Transfer — ${tx.account === 'freedom-checking' ? 'Freedom Checking' : 'Business Savings'}</div>
+            </div>
+            <div class="negative">-$${Math.abs(tx.amount).toFixed(2)}</div>
+          `;
+          list.insertBefore(item, list.firstChild);
+        });
+      }
+
+      function revealOnScroll() {
+        document.querySelectorAll('.reveal').forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < (window.innerHeight - 60)) el.classList.add('visible');
+        });
+      }
+      revealOnScroll();
+      window.addEventListener('scroll', revealOnScroll);
+
+      document.getElementById('viewAccountsBtn').addEventListener('click', function () {
+        document.getElementById('loadingOverlay').classList.add('active');
+        setTimeout(() => { window.location.href = 'transaction-history.html'; }, 3000);
+      });
+      document.getElementById('logOffLink').addEventListener('click', e => {
+        e.preventDefault(); B.handleLogout();
+      });
+
+      // ===== TRANSFER MODAL =====
+      const overlay = document.getElementById('transferModalOverlay');
+      const formScreen = document.getElementById('transferFormScreen');
+      const sentScreen = document.getElementById('sentScreen');
+      const form = document.getElementById('transferForm');
+      const fromSelect = document.getElementById('fromAccount');
+      const fromBalanceHint = document.getElementById('fromAccountBalance');
+
+      function updateHint() {
+        const bal = B.getBalanceFor(fromSelect.value);
+        fromBalanceHint.textContent = 'Available: ' + B.formatCurrency(bal);
+      }
+      fromSelect.addEventListener('change', updateHint);
+
+      document.getElementById('openTransferBtn').addEventListener('click', () => {
+        formScreen.style.display = 'block';
+        sentScreen.style.display = 'none';
+        form.reset();
+        updateHint();
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => document.getElementById('recipientName').focus(), 200);
+      });
+
+      function closeModal() {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      document.getElementById('closeTransferModal').addEventListener('click', closeModal);
+      overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) closeModal();
+      });
+      document.getElementById('doneBtn').addEventListener('click', closeModal);
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const fromAccount = fromSelect.value;
+        const recipientName = B.sanitizeInput(document.getElementById('recipientName').value);
+        const recipientAccount = document.getElementById('recipientAccount').value.trim();
+        const routingNumber = document.getElementById('routingNumber').value.trim();
+        const amount = parseFloat(document.getElementById('transferAmount').value);
+        const memo = B.sanitizeInput(document.getElementById('transferMemo').value);
+
+        if (!recipientName || !recipientAccount || !routingNumber || !amount || amount <= 0) {
+          B.showSecurityAlert('Please fill in all required fields with valid values.'); return;
         }
-      }, 5000);
-    }
+        if (!/^\d+$/.test(recipientAccount)) {
+          B.showSecurityAlert('Recipient account number must contain only digits.'); return;
+        }
+        if (!/^\d{9}$/.test(routingNumber)) {
+          B.showSecurityAlert('Routing number must be exactly 9 digits.'); return;
+        }
 
-    // Logout function
-    function handleLogout() {
-      // Clear session storage
-      sessionStorage.removeItem('otpVerified');
-      sessionStorage.removeItem('verifiedAt');
-      sessionStorage.removeItem('csrfToken');
-      
-      // Show logout message
-      showSecurityAlert('You have been successfully logged out.');
-      
-      // Redirect to login page after delay
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1500);
-    }
+        const available = B.getBalanceFor(fromAccount);
+        if (amount > available) {
+          B.showSecurityAlert('Insufficient funds. Available: ' + B.formatCurrency(available)); return;
+        }
 
-    // Initial loading screen functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      // Check authentication first
-      if (!checkAuthentication()) {
-        return;
-      }
+        const submitBtn = document.getElementById('submitTransferBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
 
-      const loadingScreen = document.getElementById('initialLoadingScreen');
-      
-      // Show the loading screen for 5 seconds
-      setTimeout(function() {
-        loadingScreen.classList.add('fade-out');
-        
-        // Remove the loading screen after fade out completes
-        setTimeout(function() {
-          loadingScreen.style.display = 'none';
-        }, 500);
-      }, 5000);
-    });
+        setTimeout(function () {
+          const newBalances = B.deductFromAccount(fromAccount, amount);
 
-    function revealOnScroll(){
-      document.querySelectorAll('.reveal').forEach(el=>{
-        const rect = el.getBoundingClientRect();
-        if(rect.top < (window.innerHeight - 60)) el.classList.add('visible');
-      })
-    }
-    revealOnScroll();
-    window.addEventListener('scroll', revealOnScroll);
-    
-    // Improved accessibility - keyboard navigation
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        // Close any open modals or focus on main content
-        document.querySelector('main').focus();
-      }
-    });
+          const refNum = 'OG' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2, 4).toUpperCase();
+          const now = new Date();
+          const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' at ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+          const shortDate = now.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 
-    // Security: Add input sanitization for any future form inputs
-    const sanitizeInput = (input) => {
-      return input.replace(/[<>]/g, '').trim();
-    };
+          const tx = {
+            date: shortDate,
+            title: 'Transfer to ' + recipientName + (memo ? ' (' + memo + ')' : ''),
+            type: 'Transfer',
+            amount: -amount,
+            balance: fromAccount === 'freedom-checking' ? newBalances.freedomChecking : newBalances.businessSavings,
+            account: fromAccount,
+            ref: refNum,
+            timestamp: now.toISOString()
+          };
+          B.addTransaction(tx);
 
-    // Loading functionality for View All Accounts button
-    document.getElementById('viewAccountsBtn').addEventListener('click', function() {
-      // Security: Verify CSRF token
-      const storedToken = sessionStorage.getItem('csrfToken');
-      if (!storedToken || storedToken !== csrfToken) {
-        showSecurityAlert('Security verification failed. Please login again.');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-        return;
-      }
+          updateDashboardBalances();
+          flashBalance(document.getElementById(fromAccount === 'freedom-checking' ? 'freedomCheckingBalance' : 'businessSavingsBalance'));
 
-      const loadingOverlay = document.getElementById('loadingOverlay');
-      
-      // Show loading overlay
-      loadingOverlay.classList.add('active');
-      
-      // Wait 3 seconds then redirect
-      setTimeout(function() {
-        window.location.href = 'transaction-history.html';
-      }, 3000);
-    });
+          document.getElementById('sentAmount').textContent = '$' + amount.toFixed(2);
+          document.getElementById('sentRecipient').textContent = 'to ' + recipientName;
+          document.getElementById('sentAccount').textContent = 'Account: ****' + recipientAccount.slice(-4);
+          document.getElementById('sentDate').textContent = 'Date: ' + dateStr;
+          document.getElementById('sentRef').textContent = 'Ref: ' + refNum;
+          document.getElementById('sentNewBalance').textContent = 'New balance: ' + B.formatCurrency(tx.balance);
 
-    // Add logout functionality to the Log Off link
-    document.getElementById('logOffLink').addEventListener('click', function(e) {
-      e.preventDefault();
-      handleLogout();
-    });
+          formScreen.style.display = 'none';
+          sentScreen.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send Transfer';
 
-    // Security: Add session timeout warning
-    let inactivityTime = 0;
-    const sessionTimeout = 30 * 60 * 1000; // 30 minutes
-    
-    function resetInactivityTimer() {
-      inactivityTime = 0;
-    }
-    
-    function checkInactivity() {
-      inactivityTime += 1000;
-      if (inactivityTime >= sessionTimeout - 60000) { // Warn 1 minute before timeout
-        showSecurityAlert('Your session will expire in 1 minute due to inactivity.');
-      }
-      if (inactivityTime >= sessionTimeout) {
-        showSecurityAlert('Session expired due to inactivity.');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-      }
-    }
-    
-    // Reset timer on user activity
-    document.addEventListener('mousemove', resetInactivityTimer);
-    document.addEventListener('keypress', resetInactivityTimer);
-    document.addEventListener('click', resetInactivityTimer);
-    
-    // Check inactivity every second
-    setInterval(checkInactivity, 1000);
+          const list = document.getElementById('recentActivityList');
+          const item = document.createElement('div');
+          item.className = 'item';
+          item.style.animation = 'fadeIn 0.5s ease';
+          item.innerHTML = `
+            <div>
+              <div style="font-weight:700">${tx.title}</div>
+              <div class="small meta">Outgoing Transfer — ${fromAccount === 'freedom-checking' ? 'Freedom Checking' : 'Business Savings'}</div>
+            </div>
+            <div class="negative">-$${amount.toFixed(2)}</div>
+          `;
+          list.insertBefore(item, list.firstChild);
+
+          const style = document.createElement('style');
+          style.textContent = '@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }';
+          document.head.appendChild(style);
+
+          const txCountEl = document.getElementById('totalTransactions');
+          if (txCountEl) txCountEl.textContent = parseInt(txCountEl.textContent || '47') + 1;
+
+        }, 1800);
+      });
+
+      document.getElementById('transferAmount').addEventListener('blur', function () {
+        if (this.value && !isNaN(this.value)) this.value = parseFloat(this.value).toFixed(2);
+      });
+    })();
   </script>
 </body>
 </html>
-
