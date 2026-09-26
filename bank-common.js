@@ -11,9 +11,12 @@
     transactions: 'ogb_transactions',
     csrf: 'csrfToken',
     otp: 'otpVerified',
-    verifiedAt: 'verifiedAt'
+    verifiedAt: 'verifiedAt',
+    lastLogin: 'ogb_lastLogin',
+    lastUpdated: 'ogb_lastUpdated'
   };
 
+  // ---------- BALANCES ----------
   function getBalances() {
     const stored = localStorage.getItem(STORAGE_KEYS.balances);
     if (stored) {
@@ -45,6 +48,7 @@
     return accountKey === 'freedom-checking' ? b.freedomChecking : b.businessSavings;
   }
 
+  // ---------- TRANSACTIONS ----------
   function getSavedTransactions() {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEYS.transactions) || '[]');
@@ -62,8 +66,11 @@
   function clearAll() {
     localStorage.removeItem(STORAGE_KEYS.balances);
     localStorage.removeItem(STORAGE_KEYS.transactions);
+    localStorage.removeItem(STORAGE_KEYS.lastUpdated);
+    sessionStorage.removeItem(STORAGE_KEYS.lastLogin);
   }
 
+  // ---------- FORMATTERS ----------
   function formatCurrency(n) {
     const sign = n < 0 ? '-' : '';
     const abs = Math.abs(n);
@@ -85,6 +92,50 @@
     return (input || '').replace(/[<>]/g, '').trim();
   }
 
+  // ---------- TIMESTAMPS ----------
+  function formatDateTime(date) {
+    // "09/26/2026 at 2:14 PM"
+    const d = date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    const t = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return d + ' at ' + t;
+  }
+
+  function formatLongDateTime(date) {
+    // "September 26, 2026 2:14 PM"
+    const d = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const t = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return d + ' ' + t;
+  }
+
+  function updateLastLogin() {
+    const now = new Date();
+    sessionStorage.setItem(STORAGE_KEYS.lastLogin, now.toISOString());
+    return now;
+  }
+
+  function getLastLogin() {
+    const stored = sessionStorage.getItem(STORAGE_KEYS.lastLogin);
+    if (stored) {
+      try { return new Date(stored); } catch (e) {}
+    }
+    return new Date();
+  }
+
+  function updateLastUpdated() {
+    const now = new Date();
+    localStorage.setItem(STORAGE_KEYS.lastUpdated, now.toISOString());
+    return now;
+  }
+
+  function getLastUpdated() {
+    const stored = localStorage.getItem(STORAGE_KEYS.lastUpdated);
+    if (stored) {
+      try { return new Date(stored); } catch (e) {}
+    }
+    return new Date();
+  }
+
+  // ---------- SECURITY ----------
   function generateCSRFToken() {
     return 'csrf_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
   }
@@ -132,6 +183,7 @@
     sessionStorage.removeItem(STORAGE_KEYS.otp);
     sessionStorage.removeItem(STORAGE_KEYS.verifiedAt);
     sessionStorage.removeItem(STORAGE_KEYS.csrf);
+    sessionStorage.removeItem(STORAGE_KEYS.lastLogin);
     showSecurityAlert('You have been successfully logged out.');
     setTimeout(() => { window.location.href = 'index.html'; }, 1500);
   }
@@ -168,6 +220,12 @@
     formatCurrency,
     formatBalanceHTML,
     sanitizeInput,
+    formatDateTime,
+    formatLongDateTime,
+    updateLastLogin,
+    getLastLogin,
+    updateLastUpdated,
+    getLastUpdated,
     generateCSRFToken,
     initCSRF,
     checkAuthentication,
